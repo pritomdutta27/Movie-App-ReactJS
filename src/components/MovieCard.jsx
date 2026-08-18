@@ -1,6 +1,6 @@
 import React from 'react';
 import NoMoviePoster from '../assets/No-Poster-vertical.png'
-import rating from '../assets/Rating.svg'
+import ratingIcon from '../assets/Rating.svg'
 
 const MovieCard = ({movie:
     { title, poster_path, vote_average, release_date, original_language}
@@ -14,7 +14,7 @@ const MovieCard = ({movie:
 
                 <div className="content">
                     <div className="rating">
-                        <img src={rating} alt="rating"/>
+                        <img src={ratingIcon} alt="rating"/>
                         <p>{vote_average ? vote_average.toFixed(1) : "N/A"}</p>
                     </div>
 
