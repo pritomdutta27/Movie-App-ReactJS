@@ -5,6 +5,7 @@ import logo from "./assets/logo.png";
 import Spinner from "./components/Spinner.jsx";
 import MovieCard from "./components/MovieCard.jsx";
 import {useDebounce} from "react-use";
+import {getTrendingMovies, updateSearchCount} from "./appwrite.jsx";
 
 const API_BASE_URL = 'https://api.themoviedb.org/3/';
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -22,6 +23,7 @@ const App = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [movieList, setMovieList] = useState([]);
+    const [trendingMovie, setTrendingMovie] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
@@ -49,6 +51,9 @@ const App = () => {
             }
 
             setMovieList(data.results);
+            if(query && data.results.length > 0) {
+                updateSearchCount({searchTerm: query, movie: data.results[0]});
+            }
         }catch (error) {
             console.log(`error in fetchMovies ${error}`);
             setErrorMessage(`Error fetching movies. please try again later.\n${error} `);
@@ -57,9 +62,22 @@ const App = () => {
         }
     }
 
+    const loadTrendingMovies = async () => {
+        try {
+            const movies = await getTrendingMovies();
+            setTrendingMovie(movies);
+        }catch (error) {
+            console.log(`error in fetchTrendingMovies ${error}`);
+        }
+    }
+
     useEffect(()=>{
         fetchMovies(searchTerm);
     }, [debouncedSearchTerm]);
+
+    useEffect(() => {
+        loadTrendingMovies()
+    }, [])
 
     return (
         <main>
@@ -79,8 +97,23 @@ const App = () => {
                         setSearchTerm = {setSearchTerm}
                     />
 
+                    {trendingMovie.length > 0 && (
+                        <section className="trending">
+                            <h2>Treading Movie</h2>
+                            <ul>
+                                { trendingMovie.map((movie, index) => (
+                                    <li key={movie.$id}>
+                                        <p>{index + 1}</p>
+                                        <img src={movie.poster_url} alt="poster" />
+                                    </li>
+                                ))}
+                            </ul>
+                        </section>
+                    )}
+
+
                     <section className="all-movies">
-                        <h2 className="mt-8">All Movies</h2>
+                        <h2>All Movies</h2>
                         { isLoading ?
                             (
                                 <Spinner/>
